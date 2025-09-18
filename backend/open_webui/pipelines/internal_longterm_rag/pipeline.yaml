@@ -1,0 +1,42 @@
+name: internal_longterm_rag
+version: 1
+modes:
+  ingest:
+    description: Internal long-term ingestion pipeline
+    dag:
+      - source_select
+      - docling_ocr
+      - normalize_meta
+      - text_chunk
+      - embed
+      - qdrant_upsert_longterm
+      - neo4j_enrich
+      - finalize
+    inputs:
+      path: optional
+      url: optional
+      file: optional
+      collection: optional
+    outputs:
+      pages: list
+      chunks: list
+      vectors: list
+      graph_nodes: int
+      graph_relations: int
+      doc_id: string
+      ingested_at: datetime
+  search:
+    description: Internal knowledge search with reranking
+    dag:
+      - query_input
+      - embed_query
+      - qdrant_search_longterm
+      - rerank
+      - finalize
+    inputs:
+      query: required
+      collection: optional
+      limit: optional
+    outputs:
+      matches: list
+      reasons: list

@@ -1,0 +1,41 @@
+name: user_ephemeral_rag
+version: 1
+modes:
+  ingest:
+    description: Ephemeral tenant-scoped ingestion pipeline
+    dag:
+      - file_ingest
+      - docling_ocr
+      - text_chunk
+      - embed
+      - qdrant_upsert_ephemeral
+      - finalize
+    inputs:
+      file: required
+      tenant_id: optional
+      session_id: optional
+      collection: optional
+      ttl_hours: optional
+    outputs:
+      pages: list
+      chunks: list
+      vectors: list
+      expire_at: datetime
+      doc_id: string
+  search:
+    description: Ephemeral tenant scoped semantic search
+    dag:
+      - query_input
+      - embed_query
+      - qdrant_search_ephemeral
+      - rerank
+      - finalize
+    inputs:
+      query: required
+      tenant_id: required
+      session_id: optional
+      collection: optional
+      limit: optional
+    outputs:
+      matches: list
+      reasons: list
